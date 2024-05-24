@@ -76,7 +76,49 @@ public class DemoApplication implements CommandLineRunner {
 
     // Implementa los métodos para cada opción del menú
     public void crearUsuario() {
-        System.out.println("Hola");
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("----- CREAR USUARIO -----");
+        
+        // Solicitar los datos del nuevo usuario
+        System.out.print("ID: ");
+        int id = scanner.nextInt();
+        scanner.nextLine(); // Consumir la nueva línea pendiente
+        
+        System.out.print("Nombre: ");
+        String nombre = scanner.nextLine();
+
+        System.out.print("Login: ");
+        String login = scanner.nextLine();
+
+        System.out.print("Palabra clave: ");
+        String palabraClave = scanner.nextLine();
+
+        System.out.print("Nacionalidad: ");
+        String nacionalidad = scanner.nextLine();
+
+        System.out.print("Dirección: ");
+        String direccion = scanner.nextLine();
+
+        System.out.print("Teléfono: ");
+        String telefono = scanner.nextLine();
+
+        System.out.print("Ciudad: ");
+        String ciudad = scanner.nextLine();
+
+        System.out.print("Código postal: ");
+        String codigoPostal = scanner.nextLine();
+
+        System.out.print("Rol: ");
+        String rol = scanner.nextLine();
+
+        // Crear una instancia de Usuario con los datos ingresados
+        Usuario nuevoUsuario = new Usuario(id, nombre, login, palabraClave, nacionalidad, direccion, telefono, ciudad, codigoPostal, rol);
+
+        // Guardar el nuevo usuario en la base de datos
+        usuarioRepository.save(nuevoUsuario);
+
+        System.out.println("Usuario creado exitosamente.");
     }
 
     public void crearOficina() {
