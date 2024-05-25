@@ -13,6 +13,8 @@ import uniandes.edu.co.demo.modelo.PuntoAtencion;
 import uniandes.edu.co.demo.modelo.Usuario;
 import uniandes.edu.co.demo.repository.OficinaRepository;
 import uniandes.edu.co.demo.repository.PuntoAtencionRepository;
+import uniandes.edu.co.demo.modelo.Cuenta;
+import uniandes.edu.co.demo.repository.CuentaRepository;
 import uniandes.edu.co.demo.repository.UsuarioRepository;
 
 @ComponentScan({"uniandes.edu.co.demo.repository"})
@@ -21,6 +23,10 @@ public class DemoApplication implements CommandLineRunner {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private CuentaRepository cuentaRepository;
+    
+
 
     @Autowired
     private OficinaRepository oficinaRepository;
@@ -28,6 +34,8 @@ public class DemoApplication implements CommandLineRunner {
     @Autowired
     private PuntoAtencionRepository puntoAtencionRepository;
 
+
+    
     public void mostrarMenu() {
         Scanner scanner = new Scanner(System.in);
         int opcion = 0;
@@ -129,6 +137,11 @@ public class DemoApplication implements CommandLineRunner {
 
         // Guardar el nuevo usuario en la base de datos
         usuarioRepository.save(nuevoUsuario);
+
+        Cuenta nuevaCuenta = new Cuenta(12, "Ahorros", "Activa", 0, 1, 1);
+        cuentaRepository.save(nuevaCuenta);
+
+
 
         System.out.println("Usuario creado exitosamente.");
     }
@@ -262,29 +275,147 @@ public class DemoApplication implements CommandLineRunner {
     }
 
     public void crearCuenta() {
-        // Lógica para crear una cuenta
+        Scanner scanner = new Scanner(System.in);
+    
+        System.out.println("----- CREAR CUENTA -----");
+    
+        // Solicitar los datos de la nueva cuenta
+        System.out.print("ID: ");
+        int id = scanner.nextInt();
+        scanner.nextLine(); // Consumir la nueva línea pendiente
+        
+        System.out.print("Tipo: ");
+        String tipo = scanner.nextLine();
+    
+        System.out.print("Estado: ");
+        String estado = scanner.nextLine();
+    
+        System.out.print("Saldo: ");
+        int saldo = scanner.nextInt();
+        scanner.nextLine(); // Consumir la nueva línea pendiente
+        
+        System.out.print("ID del cliente: ");
+        int clienteId = scanner.nextInt();
+        scanner.nextLine(); // Consumir la nueva línea pendiente
+        
+        System.out.print("ID de la oficina: ");
+        int oficina = scanner.nextInt();
+        scanner.nextLine(); // Consumir la nueva línea pendiente
+    
+        // Crear una instancia de Cuenta con los datos ingresados
+        Cuenta nuevaCuenta = new Cuenta(id, tipo, estado, saldo, clienteId, oficina);
+    
+        // Guardar la nueva cuenta en el repositorio
+        cuentaRepository.save(nuevaCuenta);
+    
+        // Mostrar mensaje de confirmación
+        System.out.println("Cuenta creada exitosamente.");
     }
 
     public void cambiarEstadoCuenta() {
-        // Lógica para cambiar el estado de una cuenta
+        Scanner scanner = new Scanner(System.in);
+    
+        System.out.println("----- CAMBIAR ESTADO DE CUENTA -----");
+    
+        // Solicitar el ID de la cuenta cuyo estado se quiere cambiar
+        System.out.print("Ingrese el ID de la cuenta: ");
+        int idCuenta = scanner.nextInt();
+        scanner.nextLine(); // Consumir la nueva línea pendiente
+    
+        // Verificar si la cuenta existe en la base de datos
+        Optional<Cuenta> cuentaOptional = cuentaRepository.findById(idCuenta);
+        if (cuentaOptional.isPresent()) {
+            // La cuenta existe, solicitar el nuevo estado
+            System.out.print("Ingrese el nuevo estado (Activa/Inactiva/Cerrada): ");
+            String nuevoEstado = scanner.nextLine();
+    
+            // Obtener la cuenta de la base de datos
+            Cuenta cuenta = cuentaOptional.get();
+    
+            // Actualizar el estado de la cuenta
+            cuenta.setEstado(nuevoEstado);
+    
+            // Guardar los cambios en la base de datos
+            cuentaRepository.save(cuenta);
+    
+            System.out.println("Estado de la cuenta actualizado exitosamente.");
+        } else {
+            // La cuenta no existe
+            System.out.println("La cuenta con ID " + idCuenta + " no existe.");
+        }
     }
+    
 
     public void registrarOperacionSobreCuenta() {
         // Lógica para registrar una operación sobre una cuenta
     }
 
     public void consultarCuentasBancandes() {
-        // Lógica para consultar las cuentas en Bancandes
+        Scanner scanner = new Scanner(System.in);
+    
+        System.out.println("----- CONSULTAR CUENTAS EN BANCANDES -----");
+        System.out.println("Seleccione el criterio de agrupación:");
+        System.out.println("1) Por tipo de cuenta");
+        System.out.println("2) Por rango de saldos");
+        System.out.println("3) Por ID de cliente");
+        System.out.print("Ingrese su opción: ");
+        int opcion = scanner.nextInt();
+        scanner.nextLine(); // Consumir la nueva línea pendiente
+    
+        switch (opcion) {
+            case 1:
+                consultarPorTipoCuenta();
+                break;
+            case 2:
+                consultarPorRangoSaldos();
+                break;
+            case 3:
+                consultarPorIdCliente();
+                break;
+            default:
+                System.out.println("Opción no válida. Por favor, ingrese una opción válida.");
+                break;
+        }
     }
 
     public void obtenerExtractoBancario() {
         // Lógica para obtener el extracto bancario para una cuenta
     }
 
+    private void consultarPorTipoCuenta() {
+        // Realizar la consulta por tipo de cuenta y mostrar los resultados
+        List<CuentaRepository.RespuestaGrupo> cuentasPorTipo = cuentaRepository.contarPorTipoCuenta();
+        
+        // Mostrar resultados
+        System.out.println("Cuentas agrupadas por tipo de cuenta:");
+        for (CuentaRepository.RespuestaGrupo grupo : cuentasPorTipo) {
+            System.out.println("Tipo de cuenta: " + grupo.getTipo() +
+                               ", Cantidad: " + grupo.getCantidad() +
+                               ", Saldo promedio: " + grupo.getSaldoPromedio());
+        }
+    }
+    
+    private void consultarPorRangoSaldos() {
+        // Realizar consulta por rango de saldos y mostrar los resultados
+        List<Cuenta> cuentasPorRangoSaldos = cuentaRepository.findAll(); // Aquí debes implementar la consulta adecuada
+        // Mostrar resultados
+        System.out.println("Cuentas agrupadas por rango de saldos:");
+        // Aquí debes mostrar los resultados de la consulta
+    }
+    
+    private void consultarPorIdCliente() {
+        // Realizar consulta por ID de cliente y mostrar los resultados
+        List<Cuenta> cuentasPorIdCliente = cuentaRepository.findAll(); // Aquí debes implementar la consulta adecuada
+        // Mostrar resultados
+        System.out.println("Cuentas agrupadas por ID de cliente:");
+        // Aquí debes mostrar los resultados de la consulta
+    }
+
     // Método run requerido por CommandLineRunner
     @Override
     public void run(String... args) throws Exception {
         // Llama al método para mostrar el menú
+        
         mostrarMenu();
     }
 
