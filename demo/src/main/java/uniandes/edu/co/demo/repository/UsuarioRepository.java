@@ -2,7 +2,6 @@ package uniandes.edu.co.demo.repository;
 
 import java.util.List;
 
-import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -10,6 +9,9 @@ import org.springframework.data.mongodb.repository.Query;
 import uniandes.edu.co.demo.modelo.Usuario;
 
 public interface UsuarioRepository extends MongoRepository<Usuario, Integer> {
+    
+    // Búsqueda de todos los usuarios
+    List<Usuario> findAll();
 
     // Búsqueda por login
     @Query("{login: ?0}")
@@ -34,7 +36,6 @@ public interface UsuarioRepository extends MongoRepository<Usuario, Integer> {
     })
     List<ContarUsuariosPorCiudad> contarUsuariosPorCiudad();
 
-    // Clase interna para la respuesta de agregación
     public static class ContarUsuariosPorCiudad {
         private String ciudad;
         private int count;

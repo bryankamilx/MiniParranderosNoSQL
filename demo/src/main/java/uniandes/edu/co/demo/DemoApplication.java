@@ -1,16 +1,19 @@
 package uniandes.edu.co.demo;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import uniandes.edu.co.demo.modelo.Oficina;
+import uniandes.edu.co.demo.modelo.PuntoAtencion;
 import uniandes.edu.co.demo.modelo.Usuario;
+import uniandes.edu.co.demo.repository.OficinaRepository;
+import uniandes.edu.co.demo.repository.PuntoAtencionRepository;
 import uniandes.edu.co.demo.repository.UsuarioRepository;
-import uniandes.edu.co.demo.repository.UsuarioRepository.ContarUsuariosPorCiudad;
 
 @ComponentScan({"uniandes.edu.co.demo.repository"})
 @SpringBootApplication
@@ -18,6 +21,12 @@ public class DemoApplication implements CommandLineRunner {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private OficinaRepository oficinaRepository;
+
+    @Autowired
+    private PuntoAtencionRepository puntoAtencionRepository;
 
     public void mostrarMenu() {
         Scanner scanner = new Scanner(System.in);
@@ -32,6 +41,7 @@ public class DemoApplication implements CommandLineRunner {
             System.out.println("6) REGISTRAR OPERACIÓN SOBRE CUENTA");
             System.out.println("7) CONSULTAR LAS CUENTAS EN BANCANDES");
             System.out.println("8) EXTRACTO BANCARIO PARA UNA CUENTA");
+            System.out.println("9) LISTAR USUARIOS");
             System.out.println("0) SALIR");
             System.out.print("Ingrese su opción: ");
             opcion = scanner.nextInt();
@@ -63,6 +73,9 @@ public class DemoApplication implements CommandLineRunner {
                 case 8:
                     obtenerExtractoBancario();
                     break;
+                case 9:
+                    listarUsuarios();
+                    break;
                 case 0:
                     System.out.println("Saliendo del programa...");
                     break;
@@ -74,7 +87,6 @@ public class DemoApplication implements CommandLineRunner {
         scanner.close();
     }
 
-    // Implementa los métodos para cada opción del menú
     public void crearUsuario() {
         Scanner scanner = new Scanner(System.in);
 
@@ -122,11 +134,131 @@ public class DemoApplication implements CommandLineRunner {
     }
 
     public void crearOficina() {
-        // Lógica para crear una oficina
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("----- CREAR OFICINA -----");
+
+        // Solicitar los datos de la nueva oficina
+        System.out.print("Nombre: ");
+        String nombre = scanner.nextLine();
+
+        System.out.print("Dirección: ");
+        String direccion = scanner.nextLine();
+
+        System.out.print("Número de puntos de atención posibles: ");
+        int puntosDeAtencionPosibles = scanner.nextInt();
+        scanner.nextLine(); // Consumir la nueva línea pendiente
+
+        System.out.print("ID del gerente (debe ser un usuario registrado): ");
+        int gerenteId = scanner.nextInt();
+        scanner.nextLine(); // Consumir la nueva línea pendiente
+
+        // Verificar que el gerente exista
+        Optional<Usuario> usuarioGerente = usuarioRepository.findById(gerenteId);
+        if (usuarioGerente.isEmpty()) {
+            System.out.println("Gerente no encontrado. Asegúrese de que el usuario esté registrado antes de asignarlo como gerente.");
+            return;
+        }
+
+        // Crear una instancia de Oficina con los datos ingresados
+        Oficina nuevaOficina = new Oficina(nombre, direccion, puntosDeAtencionPosibles, String.valueOf(gerenteId));
+
+        // Guardar la nueva oficina en la base de datos
+        oficinaRepository.save(nuevaOficina);
+
+        System.out.println("Oficina creada exitosamente.");
+    }
+
+    public void listarUsuarios() {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        System.out.println("----- LISTA DE USUARIOS -----");
+        for (Usuario usuario : usuarios) {
+            System.out.println(usuario);
+        }
     }
 
     public void crearYBorrarPuntoDeAtencion() {
-        // Lógica para crear y borrar un punto de atención
+        manejarPuntosDeAtencion();
+    }
+
+    public void manejarPuntosDeAtencion() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("----- MANEJAR PUNTOS DE ATENCIÓN -----");
+        System.out.println("1) CREAR PUNTO DE ATENCIÓN");
+        System.out.println("2) ELIMINAR PUNTO DE ATENCIÓN");
+        System.out.println("0) VOLVER AL MENÚ PRINCIPAL");
+        System.out.print("Ingrese su opción: ");
+        int opcion = scanner.nextInt();
+        scanner.nextLine(); // Consume la nueva línea pendiente
+
+        switch (opcion) {
+            case 1:
+                crearPuntoDeAtencion();
+                break;
+            case 2:
+                eliminarPuntoDeAtencion();
+                break;
+            case 0:
+                System.out.println("Volviendo al menú principal...");
+                break;
+            default:
+                System.out.println("Opción no válida.");
+                break;
+        }
+    }
+
+    public void crearPuntoDeAtencion() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("----- CREAR PUNTO DE ATENCIÓN -----");
+
+        // Solicitar los datos del nuevo punto de atención
+        System.out.print("Tipo de punto (personalizada, cajero automático, digital): ");
+        String tipoPunto = scanner.nextLine();
+
+        System.out.print("Ubicación: ");
+        String ubicacion = scanner.nextLine();
+
+        String oficina = null;
+        if (!tipoPunto.equalsIgnoreCase("digital")) {
+            System.out.print("ID de la oficina (debe ser una oficina registrada): ");
+            oficina = scanner.nextLine();
+
+            // Verificar que la oficina exista
+            Optional<Oficina> oficinaExistente = oficinaRepository.findById(oficina);
+            if (oficinaExistente.isEmpty()) {
+                System.out.println("Oficina no encontrada. Asegúrese de que la oficina esté registrada antes de asignarla al punto de atención.");
+                return;
+            }
+        }
+
+        // Crear una instancia de PuntoAtencion con los datos ingresados
+        PuntoAtencion nuevoPuntoAtencion = new PuntoAtencion(tipoPunto, ubicacion, oficina);
+
+        // Guardar el nuevo punto de atención en la base de datos
+        puntoAtencionRepository.save(nuevoPuntoAtencion);
+
+        System.out.println("Punto de atención creado exitosamente.");
+    }
+
+    public void eliminarPuntoDeAtencion() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("----- ELIMINAR PUNTO DE ATENCIÓN -----");
+
+        // Solicitar el ID del punto de atención a eliminar
+        System.out.print("ID del punto de atención a eliminar: ");
+        String id = scanner.nextLine();
+
+        // Verificar que el punto de atención exista
+        Optional<PuntoAtencion> puntoAtencionExistente = puntoAtencionRepository.findById(id);
+        if (puntoAtencionExistente.isEmpty()) {
+            System.out.println("Punto de atención no encontrado.");
+            return;
+        }
+
+        // Eliminar el punto de atención
+        puntoAtencionRepository.deleteById(id);
+
+        System.out.println("Punto de atención eliminado exitosamente.");
     }
 
     public void crearCuenta() {
@@ -162,3 +294,4 @@ public class DemoApplication implements CommandLineRunner {
         SpringApplication.run(DemoApplication.class, args);
     }
 }
+
