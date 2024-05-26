@@ -344,7 +344,53 @@ public class DemoApplication implements CommandLineRunner {
     
 
     public void registrarOperacionSobreCuenta() {
-        // Lógica para registrar una operación sobre una cuenta
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("----- REGISTRAR OPERACION SOBRE CUENTA -----");
+        System.out.println("Seleccione el tipo de operación:");
+        System.out.println("1) Consignación");
+        System.out.println("2) Retiro");
+        System.out.println("3) Transferencia");
+        System.out.print("Ingrese su opción: ");
+        int tipoOperacion = scanner.nextInt();
+        scanner.nextLine(); 
+
+        System.out.print("ID del usuario: ");
+        int idUsuario = scanner.nextInt();
+        scanner.nextLine(); 
+
+        System.out.print("Número de cuenta: ");
+        int numeroCuenta = scanner.nextInt();
+        scanner.nextLine(); 
+
+        System.out.print("Monto de la operación: ");
+        int monto = scanner.nextInt();
+        scanner.nextLine(); 
+
+        try {
+            switch (tipoOperacion) {
+                case 1:
+                    operacionServicio.consignar(numeroCuenta, idUsuario, monto);
+                    System.out.println("Consignación realizada exitosamente.");
+                    break;
+                case 2:
+                    operacionServicio.retirar(numeroCuenta, idUsuario, monto);
+                    System.out.println("Retiro realizado exitosamente.");
+                    break;
+                case 3:
+                    System.out.print("Número de cuenta destino: ");
+                    int numeroCuentaDestino = scanner.nextInt();
+                    scanner.nextLine(); // Consumir la nueva línea pendiente
+                    operacionServicio.transferir(numeroCuenta, numeroCuentaDestino, idUsuario, monto);
+                    System.out.println("Transferencia realizada exitosamente.");
+                    break;
+                default:
+                    System.out.println("Opción no válida. Por favor, ingrese una opción válida.");
+                    break;
+            }
+        } catch (RuntimeException e) {
+            System.out.println("Error al realizar la operación: " + e.getMessage());
+        }
     }
 
     public void consultarCuentasBancandes() {
