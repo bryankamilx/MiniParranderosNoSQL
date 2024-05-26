@@ -16,8 +16,9 @@ import uniandes.edu.co.demo.repository.PuntoAtencionRepository;
 import uniandes.edu.co.demo.modelo.Cuenta;
 import uniandes.edu.co.demo.repository.CuentaRepository;
 import uniandes.edu.co.demo.repository.UsuarioRepository;
+import uniandes.edu.co.demo.service.OperacionService;
 
-@ComponentScan({"uniandes.edu.co.demo.repository"})
+@ComponentScan({"uniandes.edu.co.demo.repository","uniandes.edu.co.demo.service"})
 @SpringBootApplication
 public class DemoApplication implements CommandLineRunner {
 
@@ -26,7 +27,8 @@ public class DemoApplication implements CommandLineRunner {
     @Autowired
     private CuentaRepository cuentaRepository;
     
-
+    @Autowired
+    private OperacionService operacionServicio;
 
     @Autowired
     private OficinaRepository oficinaRepository;
@@ -46,7 +48,7 @@ public class DemoApplication implements CommandLineRunner {
             System.out.println("3) CREAR Y BORRAR PUNTO DE ATENCIÓN");
             System.out.println("4) CREAR CUENTA");
             System.out.println("5) CAMBIAR ESTADO DE CUENTA A CERRADA O DESACTIVADA");
-            System.out.println("6) REGISTRAR OPERACIÓN SOBRE CUENTA");
+            System.out.println("6) REGISTRAR OPERACION SOBRE CUENTA");
             System.out.println("7) CONSULTAR LAS CUENTAS EN BANCANDES");
             System.out.println("8) EXTRACTO BANCARIO PARA UNA CUENTA");
             System.out.println("9) LISTAR USUARIOS");
@@ -137,11 +139,6 @@ public class DemoApplication implements CommandLineRunner {
 
         // Guardar el nuevo usuario en la base de datos
         usuarioRepository.save(nuevoUsuario);
-
-        Cuenta nuevaCuenta = new Cuenta(12, "Ahorros", "Activa", 0, 1, 1);
-        cuentaRepository.save(nuevaCuenta);
-
-
 
         System.out.println("Usuario creado exitosamente.");
     }
@@ -347,7 +344,53 @@ public class DemoApplication implements CommandLineRunner {
     
 
     public void registrarOperacionSobreCuenta() {
-        // Lógica para registrar una operación sobre una cuenta
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("----- REGISTRAR OPERACION SOBRE CUENTA -----");
+        System.out.println("Seleccione el tipo de operación:");
+        System.out.println("1) Consignación");
+        System.out.println("2) Retiro");
+        System.out.println("3) Transferencia");
+        System.out.print("Ingrese su opción: ");
+        int tipoOperacion = scanner.nextInt();
+        scanner.nextLine(); 
+
+        System.out.print("ID del usuario: ");
+        int idUsuario = scanner.nextInt();
+        scanner.nextLine(); 
+
+        System.out.print("Número de cuenta: ");
+        int numeroCuenta = scanner.nextInt();
+        scanner.nextLine(); 
+
+        System.out.print("Monto de la operación: ");
+        int monto = scanner.nextInt();
+        scanner.nextLine(); 
+
+        try {
+            switch (tipoOperacion) {
+                case 1:
+                    operacionServicio.consignar(numeroCuenta, idUsuario, monto);
+                    System.out.println("Consignación realizada exitosamente.");
+                    break;
+                case 2:
+                    operacionServicio.retirar(numeroCuenta, idUsuario, monto);
+                    System.out.println("Retiro realizado exitosamente.");
+                    break;
+                case 3:
+                    System.out.print("Número de cuenta destino: ");
+                    int numeroCuentaDestino = scanner.nextInt();
+                    scanner.nextLine(); // Consumir la nueva línea pendiente
+                    operacionServicio.transferir(numeroCuenta, numeroCuentaDestino, idUsuario, monto);
+                    System.out.println("Transferencia realizada exitosamente.");
+                    break;
+                default:
+                    System.out.println("Opción no válida. Por favor, ingrese una opción válida.");
+                    break;
+            }
+        } catch (RuntimeException e) {
+            System.out.println("Error al realizar la operación: " + e.getMessage());
+        }
     }
 
     public void consultarCuentasBancandes() {
@@ -379,7 +422,19 @@ public class DemoApplication implements CommandLineRunner {
     }
 
     public void obtenerExtractoBancario() {
-        // Lógica para obtener el extracto bancario para una cuenta
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("----- OBTENER EXTRACTO BANCARIO -----"); 
+
+        System.out.print("Número de cuenta: ");
+        int numeroCuenta = scanner.nextInt();
+        scanner.nextLine(); 
+
+        System.out.print("Mes del extracto (AAAA-MM): ");
+        String mes = scanner.nextLine();
+        scanner.nextLine();
+
+        operacionServicio.generarYMostrarExtracto(numeroCuenta, mes);
     }
 
     private void consultarPorTipoCuenta() {
