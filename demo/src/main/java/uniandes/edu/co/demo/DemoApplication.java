@@ -221,7 +221,13 @@ public class DemoApplication implements CommandLineRunner {
     
 
     public void registrarOperacionSobreCuenta() {
-        // Lógica para registrar una operación sobre una cuenta
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("----- REGISTRAR OPERACION SOBRE CUENTA EN BANCANDES -----");
+        System.out.println("Seleccione el criterio de agrupación:");
+        System.out.println("1) Por tipo de cuenta");
+        System.out.println("2) Por rango de saldos");
+        System.out.println("3) Por ID de cliente");
+        System.out.print("Ingrese su opción: ");
     }
 
     public void consultarCuentasBancandes() {
