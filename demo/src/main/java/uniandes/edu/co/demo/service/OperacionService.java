@@ -99,9 +99,9 @@ public class OperacionService {
 
         for (Operacion operacion : extracto) {
             if (operacion.getTipo().equals("consignación")) {
-                saldoFinal += operacion.getValor();
+                saldoInicial -= operacion.getValor();
             } else if (operacion.getTipo().equals("retiro") || operacion.getTipo().equals("transferencia")) {
-                saldoFinal -= operacion.getValor();
+                saldoInicial += operacion.getValor();
             }
         }
 
