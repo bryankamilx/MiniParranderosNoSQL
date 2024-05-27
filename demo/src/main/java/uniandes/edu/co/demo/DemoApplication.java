@@ -228,7 +228,7 @@ public class DemoApplication implements CommandLineRunner {
         System.out.print("Ubicación: ");
         String ubicacion = scanner.nextLine();
 
-        String oficina = null;
+        String oficina = "";
         if (!tipoPunto.equalsIgnoreCase("digital")) {
             System.out.print("ID de la oficina (debe ser una oficina registrada): ");
             oficina = scanner.nextLine();
