@@ -92,12 +92,25 @@ public class OperacionService {
     }
 
     public void generarYMostrarExtracto(int numeroCuenta, String mes) {
-        List<Operacion> extracto = operacionRepository.findOperacionesConCuenta(numeroCuenta);
-        // Ahora puedes imprimir o procesar el extracto como desees
+        List<Operacion> extracto = operacionRepository.findOperacionesConCuenta(numeroCuenta, mes);
+        Operacion primeraOperacion = extracto.get(0);
+        double saldoInicial = primeraOperacion.getCuenta_info().get(0).getSaldo();
+        double saldoFinal = saldoInicial;
+
+        for (Operacion operacion : extracto) {
+            if (operacion.getTipo().equals("consignación")) {
+                saldoFinal += operacion.getValor();
+            } else if (operacion.getTipo().equals("retiro") || operacion.getTipo().equals("transferencia")) {
+                saldoFinal -= operacion.getValor();
+            }
+        }
+
         System.out.println("Extracto para la cuenta " + numeroCuenta + " en el mes " + mes + ":");
+        System.out.println("Saldo inicial: "+ saldoInicial);
         for (Operacion operacion : extracto) {
             System.out.println(operacion.toString());
         }
+        System.out.println("Saldo final: "+ saldoFinal);
     }
     
 }

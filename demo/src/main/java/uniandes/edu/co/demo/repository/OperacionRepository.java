@@ -46,8 +46,8 @@ public interface OperacionRepository extends MongoRepository<Operacion, Integer>
         }
     }
     @Aggregation(pipeline = {
-        "{ '$match': { 'cuenta': ?0 } }",
+        "{ '$match': { 'cuenta': ?0, 'fecha_hora': { '$regex': ?1 } } }",
         "{ '$lookup': { 'from': 'cuentas', 'localField': 'cuenta', 'foreignField': '_id', 'as': 'cuenta_info' } }"
     })
-    List<Operacion> findOperacionesConCuenta(int numeroCuenta);
+    List<Operacion> findOperacionesConCuenta(int numeroCuenta, String mes);
 }
