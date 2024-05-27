@@ -1,0 +1,1 @@
+Para crear los documentos necesarios en mongoDB, se pueden copiar los scripts que estan en el pdf del proyecto dentro de la carpeta docs. Ya con eso el código se puede ejecutar normal, pero esitando las credenciales de mongoDB en el proyecto para que corra en la base de datos correcta.
